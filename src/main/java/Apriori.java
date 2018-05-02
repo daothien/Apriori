@@ -1,9 +1,15 @@
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.*;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -16,20 +22,26 @@ import java.util.Map;
  * @author pc0203
  */
 public class Apriori {
-    static int minSup=2;
+    static final int minSup=3;
+    static final int minC=50;
+    static final String path="/home/daovanthien/Desktop/data.xls";
     public static void main(String[] args) {
+        Map<String,Integer> mapItemOutputAll=new HashMap<String, Integer>();
         Map<String,Integer> mapItem=new HashMap<String, Integer>();
-        
         countFrequencyFirst(mapItem);
         removeItemNoOk(mapItem);
         System.out.println(mapItem);
+        mapItemOutputAll=mapItem;
         while (!mapItem.isEmpty()) {
             mapItem = countFrequencyNext(liNew(convertMapToList(mapItem)));
             removeItemNoOk(mapItem);
+            for (String key:mapItem.keySet()) {
+                mapItemOutputAll.put(key,mapItem.get(key));
+            }
             System.out.println(mapItem);
         }
-
-
+        System.out.println(mapItemOutputAll);
+        tinhDoTin(mapItemOutputAll);
 
     }
     
@@ -41,11 +53,35 @@ public class Apriori {
         liItem.add("BE");
         return liItem;
     }
-    
+    private static List<String> docFile() {
+        List<String> a=new ArrayList<String>();
+        try {
+            Workbook workbook =WorkbookFactory.create(new File(path));
+            HSSFSheet sheet  = (HSSFSheet) workbook.getSheetAt(0);
+            Row row;
+            Iterator<Row> rowIterator = sheet.iterator();
+            while (rowIterator.hasNext()){
+                row = rowIterator.next();
+                if(row.getRowNum()<=0)
+                    continue;
+                String s1=row.getCell(1)+"";
+                String s2="";
+                for (String s3 :s1.trim().split(","))
+                    s2+=s3;
+                a.add(s2);
+            }
+            workbook.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InvalidFormatException e) {
+            e.printStackTrace();
+        }
+        return a;
+    }
     public static void countFrequencyFirst(Map<String,Integer> mapItem){
-        
-        // ??m s? l?n xu?t hi?n v� add v�o mapItem
-        for (String string : liItemInput()) {
+        for (String string : docFile()) {
             for (int i = 0; i < string.length(); i++) {
                 if (mapItem.containsKey(string.charAt(i)+"")) {
                     mapItem.put(string.charAt(i)+"", mapItem.get(string.charAt(i)+"")+1);
@@ -56,7 +92,7 @@ public class Apriori {
       
 
     }
-     //Lo?i b? c�c Item <minSup
+
     public static void removeItemNoOk(Map<String,Integer> mapItem){
     List<String> temp=new ArrayList<String>();
         for (String key : mapItem.keySet()) {
@@ -86,7 +122,6 @@ public class Apriori {
                 for (int k = 0; k < s.length(); k++) {
                     if (!li.get(i).contains(s.charAt(k)+"")) {
                         String s1=li.get(i)+s.charAt(k);
-                        System.out.println(s1);
                         liNew.add(s1);
                     }
                 }
@@ -116,10 +151,10 @@ public class Apriori {
         return true;
     }
        
-       public static Map<String,Integer> countFrequencyNext(List<String> linew){
+    public static Map<String,Integer> countFrequencyNext(List<String> linew){
         Map<String,Integer> mapTemp=new HashMap<String, Integer>();
         for (String string : linew) {
-            for (String string1 : liItemInput()) {
+            for (String string1 : docFile()) {
                 if (checkExists(string1, string)) {
                      if (mapTemp.containsKey(string)) {
                       mapTemp.put(string, mapTemp.get(string)+1);
@@ -132,4 +167,28 @@ public class Apriori {
 
            return mapTemp;
        }
+
+
+    public static void tinhDoTin(Map<String,Integer> map){
+        for (String key:map.keySet())
+            for (String key2:map.keySet())
+            {
+                if (!key.equals(key2)&&key.length()>1&&key2.length()<key.length())
+                    if (checkExists(key,key2)) {
+                        double c = 100*(map.get(key) * 1.0) / map.get(key2);
+                        if (c>minC){
+                            StringBuffer s=new StringBuffer();
+                            s.append(key);
+                            for (int i=0;i<key2.length();i++){
+                                int x=s.indexOf(key2.charAt(i)+"");
+                                s.deleteCharAt(x);
+                            }
+
+                            System.out.println(key2+"->"+s+" : C="+c );
+                        }
+
+                    }
+
+            }
+    }
 }
