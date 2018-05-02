@@ -23,8 +23,14 @@ public class Apriori {
         countFrequencyFirst(mapItem);
         removeItemNoOk(mapItem);
         System.out.println(mapItem);
-        
-        
+        while (!mapItem.isEmpty()) {
+            mapItem = countFrequencyNext(liNew(convertMapToList(mapItem)));
+            removeItemNoOk(mapItem);
+            System.out.println(mapItem);
+        }
+
+
+
     }
     
     public static List<String> liItemInput(){
@@ -38,7 +44,7 @@ public class Apriori {
     
     public static void countFrequencyFirst(Map<String,Integer> mapItem){
         
-        // ??m s? l?n xu?t hi?n và add vào mapItem
+        // ??m s? l?n xu?t hi?n vï¿½ add vï¿½o mapItem
         for (String string : liItemInput()) {
             for (int i = 0; i < string.length(); i++) {
                 if (mapItem.containsKey(string.charAt(i)+"")) {
@@ -50,7 +56,7 @@ public class Apriori {
       
 
     }
-     //Lo?i b? các Item <minSup
+     //Lo?i b? cï¿½c Item <minSup
     public static void removeItemNoOk(Map<String,Integer> mapItem){
     List<String> temp=new ArrayList<String>();
         for (String key : mapItem.keySet()) {
@@ -123,7 +129,7 @@ public class Apriori {
             }
             }
         }
-           System.out.println(mapTemp);
+
            return mapTemp;
        }
 }
