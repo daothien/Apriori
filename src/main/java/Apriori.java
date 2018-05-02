@@ -1,25 +1,45 @@
 
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 
-public class Main {
+/**
+ *
+ * @author pc0203
+ */
+public class Apriori {
+    static int minSup=2;
     public static void main(String[] args) {
-  
-        Map<String,Integer> mapOutPut=new HashMap<String, Integer>();
-
-        int minSUP=2;
-        List<String> liInput=new ArrayList<String>();
-        liInput.add("ACD");
-        liInput.add("BCE");
-        liInput.add("ABCE");
-        liInput.add("BE");
-        
         Map<String,Integer> mapItem=new HashMap<String, Integer>();
+        
+        countFrequencyFirst(mapItem);
+        removeItemNoOk(mapItem);
+        System.out.println(mapItem);
+        
+        
+    }
+    
+    public static List<String> liItemInput(){
+        List<String>liItem=new ArrayList<String>();
+        liItem.add("ACD");
+        liItem.add("BCE");
+        liItem.add("ABCE");
+        liItem.add("BE");
+        return liItem;
+    }
+    
+    public static void countFrequencyFirst(Map<String,Integer> mapItem){
+        
         // ??m s? l?n xu?t hi?n và add vào mapItem
-        for (String string : liInput) {
+        for (String string : liItemInput()) {
             for (int i = 0; i < string.length(); i++) {
                 if (mapItem.containsKey(string.charAt(i)+"")) {
                     mapItem.put(string.charAt(i)+"", mapItem.get(string.charAt(i)+"")+1);
@@ -27,12 +47,14 @@ public class Main {
                     mapItem.put(string.charAt(i)+"", 1); 
             }
         }
-        System.out.println(mapItem);
-        
-        //Lo?i b? các Item <minSup
-        List<String> temp=new ArrayList<String>();
+      
+
+    }
+     //Lo?i b? các Item <minSup
+    public static void removeItemNoOk(Map<String,Integer> mapItem){
+    List<String> temp=new ArrayList<String>();
         for (String key : mapItem.keySet()) {
-            if (mapItem.get(key)<minSUP) {
+            if (mapItem.get(key)<minSup) {
                 temp.add(key);
             }
         }
@@ -40,16 +62,17 @@ public class Main {
             mapItem.remove(string);
             
         }
-        System.out.println(mapItem);
-        
-        //convert mapItem -> List
-        List<String>li= new ArrayList<String>();
+    }
+    
+    public static List<String> convertMapToList(Map<String,Integer> mapItem){
+         List<String>li= new ArrayList<String>();
         for (String key : mapItem.keySet()) {
             li.add(key);
         }
-   
-
-    //Danh sách item m?i sau khi ghép
+        return li;
+    }
+    
+    public static List<String> liNew(List<String> li){
         List<String>liNew=new ArrayList<String>();
         for (int i = 0; i < li.size(); i++) {
             for (int j = 0; j < li.size(); j++) {
@@ -75,10 +98,22 @@ public class Main {
         for (String string : liNew) {
             System.out.println(string);
         }
-        //
+        return liNew;
+    }
+    
+       public static boolean  checkExists(String s1,String s2){
+        for (int i = 0; i < s2.length(); i++) {
+            if (!s1.contains(s2.charAt(i)+"")) {
+                return false;
+            }
+        }
+        return true;
+    }
+       
+       public static Map<String,Integer> countFrequencyNext(List<String> linew){
         Map<String,Integer> mapTemp=new HashMap<String, Integer>();
-        for (String string : liNew) {
-            for (String string1 : liInput) {
+        for (String string : linew) {
+            for (String string1 : liItemInput()) {
                 if (checkExists(string1, string)) {
                      if (mapTemp.containsKey(string)) {
                       mapTemp.put(string, mapTemp.get(string)+1);
@@ -89,15 +124,6 @@ public class Main {
             }
         }
            System.out.println(mapTemp);
-
-    }
-    // check item có t?n t?i trong list hay ko
-    public static boolean  checkExists(String s1,String s2){
-        for (int i = 0; i < s2.length(); i++) {
-            if (!s1.contains(s2.charAt(i)+"")) {
-                return false;
-            }
-        }
-        return true;
-    }
+           return mapTemp;
+       }
 }
